@@ -17,9 +17,50 @@ mimetypes.add_type("image/webp", ".webp")
 with open("examples/api_workflows/sdxl_simple_example.json", "r") as file:
     EXAMPLE_WORKFLOW_JSON = file.read()
 
+source_path = "./checkpoints"
+destination_path = "./ComfyUI"
 
 class Predictor(BasePredictor):
+    def move_files(self, src, dst):
+        try:
+            source_checkpoints = os.path.join(src)
+            target_checkpoints = os.path.join(dst, 'models/checkpoints')
+    
+            os.makedirs(target_checkpoints, exist_ok=True)
+            files = os.listdir(source_checkpoints)
+            for file in files:
+                if file.endswith('.safetensors'):
+                    src_path = os.path.join(source_checkpoints, file)
+                    dst_path = os.path.join(target_checkpoints, file)
+                    print(f"⏳ Moving {src_path} to {dst_path}")
+                    shutil.move(src_path, dst_path)
+
+            # Move files in upscale_models subdirectory
+            source_upscale = os.path.join(src, 'upscale_models')
+            target_upscale = os.path.join(dst, 'models/upscale_models')
+            os.makedirs(target_upscale, exist_ok=True)
+            upscale_files = os.listdir(source_upscale)
+            for file in upscale_files:
+                src_path = os.path.join(source_upscale, file)
+                dst_path = os.path.join(target_upscale, file)
+                print(f"⏳ Moving Upscale Model {src_path} to {dst_path}")
+                shutil.move(src_path, dst_path)
+
+            # Special case for BRIA-model.pth
+            bria_src_path = os.path.join(src, 'BRIA-model.pth')
+            bria_dst_path = os.path.join(dst, 'custom_nodes/ComfyUI-BRIA_AI-RMBG/RMBG-1.4/model.pth')
+            os.makedirs(os.path.dirname(bria_dst_path), exist_ok=True)
+            if os.path.exists(bria_src_path):
+                print(f"⏳ Moving RMBG Model from {bria_src_path} to {bria_dst_path}")
+                shutil.move(bria_src_path, bria_dst_path)
+    
+            print("Files have been moved successfully!")
+            
+        except Exception as e:
+            print(f"Error occurred while copying file: {e}")
+
     def setup(self):
+        self.move_files(source_path, destination_path)
         self.comfyUI = ComfyUI("127.0.0.1:8188")
         self.comfyUI.start_server(OUTPUT_DIR, INPUT_DIR)
 

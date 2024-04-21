@@ -39,6 +39,7 @@ class WeightsDownloader:
         )
 
     def download_if_not_exists(self, weight_str, url, dest):
+        print(f"⏳ Checking existance of {weight_str} in {dest}")
         if not os.path.exists(f"{dest}/{weight_str}"):
             self.download(weight_str, url, dest)
 

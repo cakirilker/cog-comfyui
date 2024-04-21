@@ -13,9 +13,9 @@
 *.webm
 
 # Models
-*.ckpt
-*.safetensors
-*.pth
+# *.ckpt
+# *.safetensors
+# *.pth
 *.bin
 *.onnx
 *.torchscript
